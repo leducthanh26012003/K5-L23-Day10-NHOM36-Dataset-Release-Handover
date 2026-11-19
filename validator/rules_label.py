@@ -105,9 +105,14 @@ CHECKS = [check_invalid_class, check_bbox_out_of_bounds, check_duplicate_box,
 def run(ctx: dict) -> list[dict]:
     """Chạy cả 5 luật, trả mọi lỗi tìm được (một ảnh có thể xuất hiện ở nhiều luật)."""
     found = []
-    for check in CHECKS:
-        found += check(ctx)
+    for rule in CHECKS:
+        found += rule(ctx)
     return found
+
+
+def check(d) -> list[dict]:
+    """Điểm vào cho khung validate.py của TV1: d là đối tượng Delivery (dùng d.root)."""
+    return run(load_delivery(d.root))
 
 
 def main() -> int:
@@ -116,8 +121,8 @@ def main() -> int:
     by_type: dict[str, list[str]] = {}
     for e in found:
         by_type.setdefault(e["type"], []).append(e["target"])
-    for check in CHECKS:
-        kind = check.__name__.removeprefix("check_")
+    for rule in CHECKS:
+        kind = rule.__name__.removeprefix("check_")
         names = by_type.get(kind, [])
         print(f"{kind:<22} {len(names):>3}  {' '.join(names)}")
     print(f"Tổng: {len(found)} lỗi")
