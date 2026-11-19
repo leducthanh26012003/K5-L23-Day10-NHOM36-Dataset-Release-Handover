@@ -10,6 +10,6 @@
 | TV3 | Nguyễn Viết Minh | 2A202604043 | minh23012003 | Đối chiếu phần 1 (`cross_check.py`): hàm `match()` ghép box với mask (chốt chữ ký trước 0:30); ứng viên `class_swap` / `category_swap`, `missing_box` |
 | TV6 | <<>> | <<>> | <<>> | Đối chiếu phần 2 (`cross_drift.py`): ứng viên `bbox_drift`, `instance_merge`; đo nhiễu trên lô sạch, chọn ngưỡng; số liệu cho REPORT §1 |
 | TV4 | <<>> | <<>> | <<>> | Công cụ xem ảnh `view.py`; chia ảnh cần xem; gộp `review_log.csv`; truy vết `trace.json` (`trace_query.py`); REPORT §5 |
-| TV5 | <<>> | <<>> | <<>> | Lineage (HOLD v1, kiểm `R-021`); dựng lô v2 (`build_v2.py`); `check_handover.py` hết FAIL; `security.md`; REPORT §3–4 |
+| TV5 | Phạm Trần Anh | 2A202604057 | GemmaP512 | Lineage (HOLD v1, kiểm `R-021`); dựng lô v2 (`build_v2.py`); `check_handover.py` hết FAIL; `security.md`; REPORT §3–4 |
 
 Mọi người đều xem ảnh ở Pha 2 và mỗi người có ít nhất 2 commit có nội dung dưới tên mình.
