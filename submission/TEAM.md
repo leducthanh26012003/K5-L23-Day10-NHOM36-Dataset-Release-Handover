@@ -1,7 +1,7 @@
 # Nhóm 36
 
 - Seed luyện tập: 36 (`python scripts/run_lab.py --seeds 36` → `runs/r36/`)
-- Repo: https://github.com/leducthanh26012003/K5-L23-Day10-NhomLabVin-Dataset-Release-Handover
+- Repo: https://github.com/leducthanh26012003/K5-L23-Day10-NHOM36-Dataset-Release-Handover
 
 | Vai | Họ và tên | MSHV | Tài khoản GitHub | Phần chính |
 |---|---|---|---|---|
