@@ -1,0 +1,270 @@
+{
+ "candidates": [
+  {
+   "type": "missing_box",
+   "target": "000000000872",
+   "detail": {
+    "segment_id": 12234672,
+    "pan_class": "person",
+    "seg_bbox": [
+     164,
+     126,
+     429,
+     607
+    ],
+    "seg_pixels": 47692,
+    "seg_share": 0.12,
+    "best_same_class_cover": 0.0
+   }
+  },
+  {
+   "type": "missing_box",
+   "target": "000000000872",
+   "detail": {
+    "segment_id": 8620683,
+    "pan_class": "person",
+    "seg_bbox": [
+     145,
+     101,
+     437,
+     558
+    ],
+    "seg_pixels": 25073,
+    "seg_share": 0.0631,
+    "best_same_class_cover": 0.0
+   }
+  },
+  {
+   "type": "missing_box",
+   "target": "000000001503",
+   "detail": {
+    "segment_id": 10922152,
+    "pan_class": "keyboard",
+    "seg_bbox": [
+     161,
+     152,
+     315,
+     198
+    ],
+    "seg_pixels": 4083,
+    "seg_share": 0.0532,
+    "best_same_class_cover": 0.0
+   }
+  },
+  {
+   "type": "missing_box",
+   "target": "000000004495",
+   "detail": {
+    "segment_id": 7752776,
+    "pan_class": "couch",
+    "seg_bbox": [
+     202,
+     199,
+     498,
+     375
+    ],
+    "seg_pixels": 39928,
+    "seg_share": 0.2129,
+    "best_same_class_cover": 0.0
+   }
+  },
+  {
+   "type": "class_swap",
+   "target": "000000004795",
+   "detail": {
+    "need_review": "class_swap hoặc category_swap: mở ảnh xem nguồn nào ghi đúng vật",
+    "box": [
+     152.8,
+     113.5,
+     548.1,
+     477.9
+    ],
+    "label_line": 1,
+    "det_class": "vase",
+    "segment_id": 6383217,
+    "pan_class": "cat",
+    "cover": 1.0,
+    "fill": 0.5948
+   }
+  },
+  {
+   "type": "bbox_drift",
+   "target": "000000007278",
+   "detail": {
+    "box_idx": 2,
+    "box": [
+     293.4,
+     66.3,
+     343.1,
+     122.9
+    ],
+    "segment_id": 12960199,
+    "det_class": "surfboard",
+    "pan_class": "surfboard",
+    "cover": 0.875,
+    "fill": 0.588,
+    "bbox_iou": 0.625,
+    "center_dist": 0.126,
+    "score": 0.375,
+    "reason": "Cùng lớp 'surfboard': độ lệch tâm=0.13, bbox_iou=0.63 (tâm box bị trôi)"
+   }
+  },
+  {
+   "type": "bbox_drift",
+   "target": "000000007386",
+   "detail": {
+    "box_idx": 4,
+    "box": [
+     218.7,
+     158.8,
+     279.7,
+     214.1
+    ],
+    "segment_id": 855829,
+    "det_class": "bicycle",
+    "pan_class": "bicycle",
+    "cover": 0.432,
+    "fill": 0.492,
+    "bbox_iou": 0.417,
+    "center_dist": 0.357,
+    "score": 0.714,
+    "reason": "Cùng lớp 'bicycle': cover=0.43, bbox_iou=0.42 (box lệch khỏi mask)"
+   }
+  },
+  {
+   "type": "bbox_drift",
+   "target": "000000007386",
+   "detail": {
+    "box_idx": 3,
+    "box": [
+     221.8,
+     101.0,
+     289.9,
+     166.2
+    ],
+    "segment_id": 855829,
+    "det_class": "bicycle",
+    "pan_class": "bicycle",
+    "cover": 0.6,
+    "fill": 0.519,
+    "bbox_iou": 0.553,
+    "center_dist": 0.254,
+    "score": 0.508,
+    "reason": "Cùng lớp 'bicycle': cover=0.60, bbox_iou=0.55 (box lệch khỏi mask)"
+   }
+  },
+  {
+   "type": "instance_merge",
+   "target": "000000007386",
+   "detail": {
+    "segment_id": 855829,
+    "pan_class": "bicycle",
+    "pixels": 3827,
+    "boxes": [
+     3,
+     4
+    ],
+    "sum_cover": 1.031,
+    "containment": 0.127,
+    "score": 0.703,
+    "reason": "Segment panoptic 'bicycle' (3827px) phủ lên 2 box detection riêng biệt [3, 4] (tổng cover=1.03, containment=0.13)"
+   }
+  },
+  {
+   "type": "bbox_drift",
+   "target": "000000014007",
+   "detail": {
+    "box_idx": 1,
+    "box": [
+     340.3,
+     153.4,
+     416.9,
+     298.4
+    ],
+    "segment_id": 1778991,
+    "det_class": "cat",
+    "pan_class": "cat",
+    "cover": 0.576,
+    "fill": 0.657,
+    "bbox_iou": 0.338,
+    "center_dist": 0.398,
+    "score": 0.796,
+    "reason": "Cùng lớp 'cat': cover=0.58, bbox_iou=0.34 (box lệch khỏi mask)"
+   }
+  },
+  {
+   "type": "class_swap",
+   "target": "000000014888",
+   "detail": {
+    "need_review": "class_swap hoặc category_swap: mở ảnh xem nguồn nào ghi đúng vật",
+    "box": [
+     0.0,
+     3.1,
+     639.3,
+     441.5
+    ],
+    "label_line": 1,
+    "det_class": "sheep",
+    "segment_id": 2766656,
+    "pan_class": "cow",
+    "cover": 1.0,
+    "fill": 0.5247
+   }
+  },
+  {
+   "type": "class_swap",
+   "target": "000000018833",
+   "detail": {
+    "need_review": "class_swap hoặc category_swap: mở ảnh xem nguồn nào ghi đúng vật",
+    "box": [
+     186.7,
+     46.9,
+     507.4,
+     370.5
+    ],
+    "label_line": 1,
+    "det_class": "cat",
+    "segment_id": 6976126,
+    "pan_class": "dog",
+    "cover": 1.0,
+    "fill": 0.4104
+   }
+  },
+  {
+   "type": "missing_box",
+   "target": "000000020059",
+   "detail": {
+    "segment_id": 6711659,
+    "pan_class": "zebra",
+    "seg_bbox": [
+     110,
+     200,
+     217,
+     306
+    ],
+    "seg_pixels": 6925,
+    "seg_share": 0.0253,
+    "best_same_class_cover": 0.0
+   }
+  },
+  {
+   "type": "class_swap",
+   "target": "000000020333",
+   "detail": {
+    "need_review": "class_swap hoặc category_swap: mở ảnh xem nguồn nào ghi đúng vật",
+    "box": [
+     1.4,
+     494.8,
+     264.6,
+     630.0
+    ],
+    "label_line": 3,
+    "det_class": "bowl",
+    "segment_id": 8026746,
+    "pan_class": "wine glass",
+    "cover": 1.0,
+    "fill": 0.6872
+   }
+  }
+ ]
+}

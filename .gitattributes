@@ -1,0 +1,3 @@
+
+# Preserve exported bytes for manifest and reproducible ZIP hashes across platforms.
+submission/r36/** -text
