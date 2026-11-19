@@ -168,9 +168,10 @@ def main(argv=None) -> int:
                 continue
             found = mod.candidates(d)
             print(f"{name}: {len(found)} ứng viên", file=sys.stderr)
-            for c in found:                    # bỏ trùng (type, target) giữa hai module
-                if (c["type"], c["target"]) not in seen:
-                    seen.add((c["type"], c["target"]))
+            for c in found:                    # chỉ bỏ ứng viên trùng HẲN (cùng type, target và detail):
+                key = json.dumps(c, sort_keys=True, ensure_ascii=False)   # một ảnh có thể có 2 missing_box
+                if key not in seen:                                       # ở 2 segment khác nhau, phải giữ cả hai
+                    seen.add(key)
                     cands.append(c)
         cands.sort(key=lambda c: (c["target"], c["type"]))
         cp = Path(args.candidates)
