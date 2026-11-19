@@ -39,8 +39,8 @@ Khi có 6 người, phần **đối chiếu** (khó nhất và ảnh hưởng nh
 |---|---|---|---|
 | **TV1** | Trưởng nhóm · khung validator · luật **file + metadata** · tích hợp & nộp bài | P0, P1, P6b | `validator/validate.py`, `validator/rules_file.py`, `TEAM.md`, `prompts.md`, `REPORT.md` §1–2 |
 | **TV2** | Luật **nhãn detection + panoptic** · tiện ích đọc mask · thử độ bền | P1 | `validator/common.py`, `validator/rules_label.py` |
-| **TV3** | Đối chiếu (1): **ghép box ↔ segment** · `class_swap` / `category_swap` · `missing_box` | P2 | `validator/crosscheck.py` |
-| **TV6** | Đối chiếu (2): **`bbox_drift` · `instance_merge`** · đo nhiễu lô sạch · chọn ngưỡng | P2 | `validator/crosscheck_geom.py`, `REPORT.md` §1 (phần ứng viên/ngưỡng) |
+| **TV3** | Đối chiếu (1): **ghép box ↔ segment** · `class_swap` / `category_swap` · `missing_box` | P2 | `validator/cross_check.py` |
+| **TV6** | Đối chiếu (2): **`bbox_drift` · `instance_merge`** · đo nhiễu lô sạch · chọn ngưỡng | P2 | `validator/cross_drift.py`, `REPORT.md` §1 (phần ứng viên/ngưỡng) |
 | **TV4** | **Công cụ xem ảnh** · điều phối review · **truy vết** | P2, P5 | `tools/view.py`, `tools/trace_query.py`, `review_log.csv`, `trace.json`, `REPORT.md` §5 |
 | **TV5** | **Quyết định + lineage · bàn giao v2 · bảo mật** | P3, P4, P6a | `tools/build_v2.py`, `security.md`, `REPORT.md` §3–4 |
 
@@ -60,8 +60,8 @@ validator/
 ├── common.py           # TV2: load_delivery(), yolo_to_px(), đọc mask -> {segment_id: (count, bbox, pixels)}
 ├── rules_file.py       # TV1: missing_image, wrong_hash, scene_leak, guideline_mismatch
 ├── rules_label.py      # TV2: invalid_class, bbox_out_of_bounds, duplicate_box, invalid_category_id, thing_overlap
-├── crosscheck.py       # TV3: match() + class_swap/category_swap, missing_box
-└── crosscheck_geom.py  # TV6: bbox_drift, instance_merge (dùng kết quả match() của TV3)
+├── cross_check.py       # TV3: match() + class_swap/category_swap, missing_box
+└── cross_drift.py  # TV6: bbox_drift, instance_merge (dùng kết quả match() của TV3)
 tools/                  # được dùng Pillow, KHÔNG được import từ validator
 ├── view.py             # TV4: vẽ box + viền segment, phóng to ứng viên
 ├── trace_query.py      # TV4: sinh trace.json
@@ -70,10 +70,12 @@ tools/                  # được dùng Pillow, KHÔNG được import từ val
 
 Validator chỉ dùng thư viện chuẩn. Trong `validate.py` thêm `sys.path` tới thư mục `validator/` và `scripts/` để import `common`, `pngutil`.
 
+> **Giao diện chính thức là [validator/README.md](validator/README.md) do TV1 chốt:** khung gọi `check(d)` (luật) và `candidates(d)` (ứng viên), `d` là đối tượng `Delivery`. Module nào muốn dùng hàm của `common.py` thì gọi `common.load_delivery(d.root)`. Phần dưới là ý tưởng ban đầu, chỗ nào khác README thì theo README.
+
 **Hợp đồng dữ liệu giữa các module (thống nhất ngay ở P0):**
 - Mỗi hàm luật nhận `ctx` (dict đã load: `manifest`, `meta`, `jobs`, `classes`, `panoptic`, `delivery_dir`) và trả `list[{"type", "target"}]`.
-- `crosscheck.match(ctx, image)` (TV3) trả cấu trúc ghép của một ảnh: danh sách box (pixel, tên lớp), danh sách segment thing (không crowd), và ma trận `inside[box][seg]` = tỉ lệ pixel segment nằm trong box. **TV3 chốt chữ ký hàm này trước 0:30** để TV6 code song song (trong lúc chờ, TV6 dùng bản giả lập trả dữ liệu cứng).
-- `crosscheck.run(ctx)` và `crosscheck_geom.run(ctx)` đều trả `list[{"image", "type", "score", "detail"}]` (`detail` là chữ mô tả, ví dụ `"box#3 car ↔ seg 5 truck, 0.96 pixel trong box"`).
+- `cross_check.match(ctx, image)` (TV3) trả cấu trúc ghép của một ảnh: danh sách box (pixel, tên lớp), danh sách segment thing (không crowd), và ma trận `inside[box][seg]` = tỉ lệ pixel segment nằm trong box. **TV3 chốt chữ ký hàm này trước 0:30** để TV6 code song song (trong lúc chờ, TV6 dùng bản giả lập trả dữ liệu cứng).
+- `cross_check.run(ctx)` và `cross_drift.run(ctx)` đều trả `list[{"image", "type", "score", "detail"}]` (`detail` là chữ mô tả, ví dụ `"box#3 car ↔ seg 5 truck, 0.96 pixel trong box"`).
 - `validate.py --out X` **chỉ ghi lỗi luật** vào X; `--candidates Y` ghi ứng viên của cả hai module vào Y (mỗi ảnh giữ một ứng viên có `score` cao nhất). Lỗi gán nhãn chỉ vào `errors.json` qua `merge_review.py`.
 
 ---
@@ -121,7 +123,7 @@ Validator chỉ dùng thư viện chuẩn. Trong `validate.py` thêm `sys.path` 
 ### P1 — khung `validate.py`
 - `argparse`: đối số vị trí `delivery`, `--out` bắt buộc, `--candidates` tuỳ chọn.
 - Load: `manifest.json["items"]` (dict theo tên ảnh), `metadata.json["items"]` (list → dict theo `image`), `jobs.csv`, `classes.txt`, `panoptic.json`.
-- Gọi `rules_file`, `rules_label`; nếu có `--candidates` thì gọi `crosscheck` và `crosscheck_geom`, gộp lại.
+- Gọi `rules_file`, `rules_label`; nếu có `--candidates` thì gọi `cross_check` và `cross_drift`, gộp lại.
 - **Mỗi ảnh tối đa một lỗi.** Nếu một ảnh dính nhiều luật, giữ theo thứ tự ưu tiên: `missing_image` → `wrong_hash` → `guideline_mismatch` → `invalid_class` → `bbox_out_of_bounds` → `duplicate_box` → `invalid_category_id` → `thing_overlap`. `scene_leak` tính riêng theo `scene_id`. Ảnh đã có lỗi luật thì bỏ khỏi hàng đợi ứng viên.
 - Ghi `{"errors": [...]}` sắp xếp ổn định.
 - Không đọc gì ngoài thư mục được truyền vào, không có tên ảnh/seed nào trong code.
@@ -176,7 +178,7 @@ Lặp lại cho `r101`, `r202`; chạy trên `runs/clean/delivery` phải ra **0
 
 ## 6. TV3 — Đối chiếu (1): ghép box ↔ segment · class/category swap · missing_box
 
-### Bước ghép (`crosscheck.match`): làm trước, TV6 phụ thuộc vào đây
+### Bước ghép (`cross_check.match`): làm trước, TV6 phụ thuộc vào đây
 1. Mỗi ảnh: box detection (pixel, tên lớp) và các segment **thing** (`isthing=1`), **bỏ `iscrowd=1`**.
 2. Với mỗi cặp box–segment, tính **tỉ lệ pixel của segment nằm trong box** (`inside = số pixel trong box / tổng pixel segment`) và IoU bbox.
 3. Ghép mỗi segment với box có `inside`/IoU cao nhất (ghép tham lam, mỗi box dùng một lần). Trả về cả ma trận `inside` để TV6 dùng.
@@ -200,8 +202,8 @@ py validator/validate.py runs/r5007/delivery --out runs/r5007/rules.json --candi
 
 ## 7. TV6 — Đối chiếu (2): bbox_drift · instance_merge · đo nhiễu và chọn ngưỡng
 
-### Tín hiệu của TV6 (`crosscheck_geom.py`)
-Dùng kết quả `crosscheck.match()` của TV3. Trong lúc TV3 chưa xong (trước ~0:30), viết code với một hàm giả lập trả dữ liệu cứng cùng định dạng, rồi thay bằng hàm thật.
+### Tín hiệu của TV6 (`cross_drift.py`)
+Dùng kết quả `cross_check.match()` của TV3. Trong lúc TV3 chưa xong (trước ~0:30), viết code với một hàm giả lập trả dữ liệu cứng cùng định dạng, rồi thay bằng hàm thật.
 
 | Ứng viên | Dấu hiệu | Gợi ý ngưỡng (phải đo lại) |
 |---|---|---|
