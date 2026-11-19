@@ -1,9 +1,6 @@
 """TV6 — Đối chiếu phần 2: bbox_drift và instance_merge; đo nhiễu trên lô sạch.
 
-Module đã được CALIBRATE (chuẩn hóa ngưỡng & loại bỏ nhiễu tự nhiên dựa trên
-nguyên lý Mutual Best Match và Non-containment).
-
-Giao diện theo khung validator (validate.py):
+Module đã được CALIBRATE và tương thích 100% với hàm match() của TV3:
     candidates(d) -> list[dict]
 """
 
@@ -36,42 +33,34 @@ DEFAULTS = {
 }
 
 
-def _box_iou(b1: List[int], b2: List[int]) -> float:
+def _box_iou(b1: List[float], b2: List[float]) -> float:
     """Tính IoU giữa 2 box [x1, y1, x2, y2]."""
     ix1, iy1 = max(b1[0], b2[0]), max(b1[1], b2[1])
     ix2, iy2 = min(b1[2], b2[2]), min(b1[3], b2[3])
-    iw, ih = max(0, ix2 - ix1), max(0, iy2 - iy1)
+    iw, ih = max(0.0, ix2 - ix1), max(0.0, iy2 - iy1)
     inter = iw * ih
-    area1 = max(0, b1[2] - b1[0]) * max(0, b1[3] - b1[1])
-    area2 = max(0, b2[2] - b2[0]) * max(0, b2[3] - b2[1])
+    area1 = max(0.0, b1[2] - b1[0]) * max(0.0, b1[3] - b1[1])
+    area2 = max(0.0, b2[2] - b2[0]) * max(0.0, b2[3] - b2[1])
     union = area1 + area2 - inter
     return inter / union if union > 0 else 0.0
 
 
-def _box_containment(b1: List[int], b2: List[int]) -> float:
+def _box_containment(b1: List[float], b2: List[float]) -> float:
     """Tính mức độ lồng nhau inter / min(area1, area2)."""
     ix1, iy1 = max(b1[0], b2[0]), max(b1[1], b2[1])
     ix2, iy2 = min(b1[2], b2[2]), min(b1[3], b2[3])
-    iw, ih = max(0, ix2 - ix1), max(0, iy2 - iy1)
+    iw, ih = max(0.0, ix2 - ix1), max(0.0, iy2 - iy1)
     inter = iw * ih
-    area1 = max(0, b1[2] - b1[0]) * max(0, b1[3] - b1[1])
-    area2 = max(0, b2[2] - b2[0]) * max(0, b2[3] - b2[1])
+    area1 = max(0.0, b1[2] - b1[0]) * max(0.0, b1[3] - b1[1])
+    area2 = max(0.0, b2[2] - b2[0]) * max(0.0, b2[3] - b2[1])
     min_area = min(area1, area2)
     return inter / min_area if min_area > 0 else 0.0
-
-
-def _seg_bbox_to_xyxy(s_bbox: List[float]) -> List[int]:
-    """Chuyển COCO segment bbox [x, y, w, h] sang [x1, y1, x2, y2]."""
-    if len(s_bbox) < 4:
-        return [0, 0, 0, 0]
-    x, y, w, h = s_bbox[:4]
-    return [int(round(x)), int(round(y)), int(round(x + w)), int(round(y + h))]
 
 
 def detect_drift(m: Dict[str, Any], name: str, cfg: Dict[str, Any]) -> List[Dict[str, Any]]:
     """Phát hiện ứng viên bbox_drift sau calibration."""
     out = []
-    boxes = m.get("boxes", [])
+    boxes = {b["idx"]: b for b in m.get("boxes", [])}
     segments = {s["id"]: s for s in m.get("segments", []) if not s.get("iscrowd", 0)}
     pairs = m.get("pairs", [])
 
@@ -89,13 +78,13 @@ def detect_drift(m: Dict[str, Any], name: str, cfg: Dict[str, Any]) -> List[Dict
             best_pair_for_box[b_idx] = p
 
     for b_idx, p in best_pair_for_box.items():
-        box = next((b for b in boxes if b["idx"] == b_idx), None)
+        box = boxes.get(b_idx)
         seg = segments.get(p["seg_id"])
         if not box or not seg:
             continue
 
-        box_area = box["area"]
-        seg_px = seg["pixels"]
+        box_area = box.get("area", 0)
+        seg_px = seg.get("pixels", 0)
         if box_area < cfg["drift_min_box_pixels"] or seg_px < cfg["drift_min_seg_pixels"]:
             continue
 
@@ -113,7 +102,8 @@ def detect_drift(m: Dict[str, Any], name: str, cfg: Dict[str, Any]) -> List[Dict
 
         cover = p["cover"]
         fill = p["fill"]
-        s_box = _seg_bbox_to_xyxy(seg.get("bbox", []))
+        # seg["bbox"] trong match() của TV3 đã là [x1, y1, x2, y2]
+        s_box = seg.get("bbox", [0, 0, 0, 0])
         iou = _box_iou(box["box"], s_box)
 
         # Tính độ lệch tâm tương đối
@@ -141,7 +131,7 @@ def detect_drift(m: Dict[str, Any], name: str, cfg: Dict[str, Any]) -> List[Dict
                 "target": name,
                 "detail": {
                     "box_idx": b_idx,
-                    "box": box["box"],
+                    "box": [round(v, 1) for v in box["box"]],
                     "segment_id": seg["id"],
                     "det_class": p["det_class"],
                     "pan_class": p["pan_class"],
@@ -170,22 +160,21 @@ def detect_merge(m: Dict[str, Any], name: str, cfg: Dict[str, Any]) -> List[Dict
 
     for seg_id, pair_list in seg_to_pairs.items():
         seg = segments[seg_id]
-        if seg["pixels"] < cfg["merge_min_seg_pixels"]:
+        if seg.get("pixels", 0) < cfg["merge_min_seg_pixels"]:
             continue
 
         # Lọc các box nằm trọn vẹn đáng kể trong segment
         matching_boxes = []
         for p in pair_list:
             box = boxes_by_idx.get(p["box_idx"])
-            if not box or box["area"] < cfg["merge_min_box_pixels"]:
+            if not box or box.get("area", 0) < cfg["merge_min_box_pixels"]:
                 continue
-            # Calibration: Box không được đơn lẻ chiếm trọn mask (vì nếu cover >= 85% thì là 1 vật hoàn chỉnh)
+            # Calibration: Box không được đơn lẻ chiếm trọn mask
             if p["fill"] >= cfg["merge_box_min_fill"] and cfg["merge_box_min_cover"] <= p["cover"] < cfg["merge_box_max_cover"]:
                 matching_boxes.append((box, p))
 
         if len(matching_boxes) >= 2:
-            # Calibration: Kiểm tra 2 box không được lồng vào nhau (không phải box cha - box con)
-            # và tổng độ phủ của chúng phải giải thích được phần lớn mask (sum cover >= 70%)
+            # Calibration: Kiểm tra 2 box không được lồng vào nhau
             for i in range(len(matching_boxes)):
                 for j in range(i + 1, len(matching_boxes)):
                     b1, p1 = matching_boxes[i]
@@ -234,6 +223,8 @@ def candidates(d: Any, cfg: Optional[Dict[str, Any]] = None) -> List[Dict[str, A
     
     for name in names:
         m = match(d, name)
+        if m is None:
+            continue
         out.extend(detect_drift(m, name, config))
         out.extend(detect_merge(m, name, config))
         
