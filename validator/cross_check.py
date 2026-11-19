@@ -17,7 +17,8 @@ Giao diện cho TV6 (`cross_drift.py`):
     m["pairs"]    : [{"box_idx", "seg_id", "det_class", "pan_class",
                       "inside",  # số pixel của segment nằm trong box
                       "cover",   # inside / pixels của segment   (box ghép đúng -> gần 1)
-                      "fill"}]   # inside / diện tích box
+                      "fill",    # inside / diện tích box
+                      "iou"}]    # IoU bbox của box với bbox segment (segments_info), chỉ tham khảo
     m["width"], m["height"], m["image"]
 """
 from __future__ import annotations
@@ -94,6 +95,17 @@ def _segment_ids(path: Path) -> tuple[int, int, array]:
 
 
 # ----------------------------------------------------------------------------- ghép
+def _iou(a, b) -> float:
+    """IoU hai bbox [x1, y1, x2, y2] (chỉ để tham khảo; tín hiệu chính là pixel mask)."""
+    iw = min(a[2], b[2]) - max(a[0], b[0])
+    ih = min(a[3], b[3]) - max(a[1], b[1])
+    if iw <= 0 or ih <= 0:
+        return 0.0
+    inter = iw * ih
+    union = (a[2] - a[0]) * (a[3] - a[1]) + (b[2] - b[0]) * (b[3] - b[1]) - inter
+    return inter / union if union > 0 else 0.0
+
+
 def match(d, name: str) -> dict | None:
     idx = _index(d)
     it = idx["items"].get(name)
@@ -129,7 +141,8 @@ def match(d, name: str) -> dict | None:
             if s is None or s["pixels"] == 0:
                 continue
             pairs.append({"box_idx": b["idx"], "seg_id": sid, "det_class": b["cls"], "pan_class": s["cls"],
-                          "inside": n, "cover": round(n / s["pixels"], 4), "fill": round(n / area, 4)})
+                          "inside": n, "cover": round(n / s["pixels"], 4), "fill": round(n / area, 4),
+                          "iou": round(_iou(b["box"], s["bbox"]), 4)})
     return {"image": name, "width": w, "height": h, "boxes": boxes, "segments": segments, "pairs": pairs}
 
 
