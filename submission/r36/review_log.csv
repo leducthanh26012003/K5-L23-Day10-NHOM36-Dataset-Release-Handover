@@ -1,0 +1,13 @@
+image,type,verdict,note
+000000000872,missing_box,confirmed,"hai cầu thủ bóng chày rõ ràng: người chạy áo trắng đội mũ bảo hiểm xanh (12% ảnh) và người áo xanh lá đang bắt bóng (6%); detection chỉ có box găng và bóng, không có box person nào"
+000000001503,missing_box,confirmed,"bàn phím trắng dài nằm giữa bàn, phía trước loa và cạnh chuột, thấy rõ từng phím; detection có laptop, tv và 2 chuột nhưng không có box keyboard"
+000000004495,missing_box,rejected,"sofa kẻ ô đỏ xanh lớn ở góc phải có box ở dòng 2 file nhãn nhưng mang mã lớp 80 (ngoài 0-79); lỗi thật là invalid_class, không phải thiếu box"
+000000004795,class_swap,confirmed,"mèo lông đen xám nhìn từ phía sau, ngồi trước màn hình máy tính, thấy rõ tai và ria; detection ghi vase sai, panoptic ghi cat đúng"
+000000007278,bbox_drift,confirmed,"người lướt sóng áo đỏ cúi trong sóng, ván trắng chĩa lên; box 2 surfboard dời sang phải và xuống khoảng 8-9 px, cắt mất mũi ván bên trái trong khi segment ôm đúng tấm ván"
+000000007386,bbox_drift,rejected,"box 3 và box 4 ôm đúng từng chiếc xe đạp treo tường; độ phủ thấp (60% và 43%) là do segment bicycle gộp hai xe, không phải box lệch"
+000000007386,instance_merge,confirmed,"trong gara tối có hai xe đạp treo tường, một chiếc trên một chiếc dưới; detection có box 3 và box 4 riêng từng xe nhưng panoptic gộp cả hai thành một segment bicycle"
+000000014007,bbox_drift,rejected,"mèo mướp ngồi trên nóc tủ lạnh xanh, box 1 ôm vừa con mèo từ tai đến chân; mask cat bị hỏng lan sang nóc tủ lạnh (ảnh đã có thing_overlap) nên độ phủ thấp, box không lệch"
+000000014888,class_swap,confirmed,"bò sữa lông đen trắng đang được vắt sữa, thấy bầu vú gắn các cốc vắt màu đỏ trắng; detection ghi sheep sai, panoptic ghi cow đúng"
+000000018833,category_swap,confirmed,"mèo mướp ngực trắng đang ngủ gối đầu lên giày thể thao, tai nhọn và ria dài; detection ghi cat đúng, panoptic ghi dog sai"
+000000020059,missing_box,rejected,"ngựa vằn nhỏ đang gặm cỏ bên trái có box ở dòng 1 file nhãn nhưng mang mã lớp 80; lỗi thật là invalid_class đã bắt bằng luật, không phải thiếu box"
+000000020333,category_swap,confirmed,"em bé đeo cà vạt đang bốc đất trong một chậu kim loại lớn ở góc dưới trái; detection ghi bowl đúng, panoptic ghi wine glass sai vì vật không có thân và chân ly"

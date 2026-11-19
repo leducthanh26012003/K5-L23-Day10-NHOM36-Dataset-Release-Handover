@@ -1,0 +1,11 @@
+image,type,annotator,reviewer,action
+000000000139,duplicate_box,A04,Q01,Khôi phục file hoặc gán lại; review và QC trước khi đưa vào release tiếp theo
+000000000872,missing_box,A04,Q01,Khôi phục file hoặc gán lại; review và QC trước khi đưa vào release tiếp theo
+000000001503,missing_box,A04,Q01,Khôi phục file hoặc gán lại; review và QC trước khi đưa vào release tiếp theo
+000000004495,invalid_class,A02,Q01,Khôi phục file hoặc gán lại; review và QC trước khi đưa vào release tiếp theo
+000000004795,class_swap,A02,Q01,Khôi phục file hoặc gán lại; review và QC trước khi đưa vào release tiếp theo
+000000006954,duplicate_box,A03,Q03,Khôi phục file hoặc gán lại; review và QC trước khi đưa vào release tiếp theo
+000000007278,bbox_drift,A03,Q03,Khôi phục file hoặc gán lại; review và QC trước khi đưa vào release tiếp theo
+000000014888,class_swap,A01,Q01,Khôi phục file hoặc gán lại; review và QC trước khi đưa vào release tiếp theo
+000000020059,invalid_class,A01,Q03,Khôi phục file hoặc gán lại; review và QC trước khi đưa vào release tiếp theo
+000000022892,bbox_out_of_bounds,A01,Q02,Khôi phục file hoặc gán lại; review và QC trước khi đưa vào release tiếp theo
